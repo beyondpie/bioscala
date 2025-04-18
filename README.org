@@ -1,0 +1,20 @@
+# bioscala
+Scala library for Biology
+
+** Scala
+   1. Set up env.
+      - Use conda/mamba to install java. Here we use Java version 22.0.1
+        =mamba install conda-forge::openjdk=22.0.1=
+      - Then use couriser to manage scala's tools, like sbt (project manager), scala and so on.
+        Check the installation details here: https://get-coursier.io/docs/cli-installation
+   2. Compile the project
+      - Under the project root, we can use sbt interactive way to compile the project.
+        =sbt= then =compile=
+      - Under the project root, we can also run =sbt compile= in terminal.
+      - [Optional] Assemble: use =sbt assembly= to assemble the scala codes into target directory.
+   3. Run
+      - Under the interactive =sbt=, use =run= to run multiple main functions, it will output the multiple
+        main functions you can run, and then you can insert the number to run the specific one.
+        - I add one "AmmMain", which can start the interactive ammonite REPL for interactive usage like
+          Python / R REPL.
+      - If you assemble the projects, you can then =java -cp target/scala-verion/version.jar someMain someArgs=.

@@ -1,0 +1,6 @@
+-Xmx800g
+-XX:+UseG1GC
+-Dscala.repl.maxprintstring=10
+-Djava.io.tmp=~/tmpdir
+--add-opens=java.base/java.lang=ALL-UNNAMED
+-Djava.util.concurrent.ForkJoinPool.common.parallelism=2

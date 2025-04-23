@@ -15,10 +15,7 @@ trait Filter {
   def filter(a: Peaks): Peaks
 }
 
-class BlacklistFilter(val v: String = "blv1") extends Filter {
-  val bedfnm =
-    if v.contains("v1") then TSCCMeta.mm10Blacklistv1Bed
-    else TSCCMeta.mm10Blacklistv2Bed
+class BlacklistFilter(val bedfnm: String) extends Filter {
   val blist: List[GenomicRange] = readTable(bedfnm, sep = "\t", head = false)
     .map(l =>
       GenomicRange(

@@ -249,3 +249,20 @@ def getStatistic(values: Seq[Double], statistic: String = "mean",
         s"Unsupported statistic: $statistic")
   }
 }
+
+/**
+  * A wrapper of if-else to get data of same type from
+  * if-else expressions.
+  *
+  * @param test
+  * @param yesValue
+  * @param noValue
+  * @return
+  */
+def ifelse[T](test: Boolean, yesValue: T, noValue: T): T = {
+  if (test) {
+    yesValue
+  } else {
+    noValue
+  }
+}

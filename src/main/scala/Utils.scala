@@ -10,11 +10,12 @@ import java.io.File
  * @param content
  * @param to
  * @param overwrite
- * @param head
+ * @param head String, columns for the file if it's "" then no columns as header
  *   no new line symbol
  */
-def writeListOfString2File(
-  content: List[String], to: String, overwrite: Boolean = true,
+def writeListOfString2File[T <: Iterable](
+  content: T[String],
+  to: String, overwrite: Boolean = true,
   head: String = ""
 ): Unit = {
   val out = os.Path(to)

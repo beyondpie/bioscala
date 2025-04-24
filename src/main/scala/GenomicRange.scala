@@ -236,6 +236,7 @@ object GenomicRange {
   * 
   */
 def findOvlpOneChrSorted(query: Vector[(Int, Int)], subject: Vector[(Int, Int)]): Vector[(Int, (Int, Int))] = {
+  // TODO: add checking if two inputs are sorted.
   val r = ListBuffer.empty[(Int, (Int, Int))]
   query.zipWithIndex.foldLeft[Int](0)((si, q) => {
     val sovlp =

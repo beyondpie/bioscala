@@ -24,6 +24,23 @@ object BedElement4 {
           e(3)
       ))
   } // end of fn readBed4
+
+
+  /**
+    * Contruct BedElement4 from two-column file.
+    * Each line is like: "chr1:3094725-3095224,Chr-O"
+    * @param fnm
+    * @param sep
+    * @param head
+    */
+  def fromTwoCols(fnm: String, sep: String, head: Boolean) = {
+    readTable(fnm, sep = sep, head = head)
+      .map(x => new BedElement4(
+        GenomicRange.fromUCSCStr(x(0)),
+        x(1)
+      ))
+      .toVector
+  }
 }
 
 /**

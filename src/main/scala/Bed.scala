@@ -17,29 +17,43 @@ case class BedElement4(x: GenomicRange, name: String) {
   }
 }
 object BedElement4 {
-  def readBed4(fnm: String, head: Boolean = false) = {
-    readTable(fnm, sep = "\t", head = head).map(e =>
-      new BedElement4(
-          new GenomicRange(e(0), e(1).toInt, e(2).toInt),
-          e(3)
-      ))
-  } // end of fn readBed4
-
 
   /**
-    * Contruct BedElement4 from two-column file.
-    * Each line is like: "chr1:3094725-3095224,Chr-O"
-    * @param fnm
-    * @param sep
-    * @param head
-    */
+   * Read bed file with four columns.
+   *
+   * @param fnm
+   *   bed filename
+   * @param head
+   */
+  def readBed4(fnm: String) = {
+    os.read.lines
+      .stream(os.Path(fnm))
+      .map(x => x.strip().split("\t"))
+      .map(e =>
+        new BedElement4(
+            new GenomicRange(e(0), e(1).toInt, e(2).toInt),
+            e(3)
+        ))
+      .toList
+  } // end of fn readBed4
+
+  /**
+   * Contruct BedElement4 from two-column file. Each line is like:
+   * "chr1:3094725-3095224,Chr-O"
+   * @param fnm
+   * @param sep
+   * @param head
+   */
   def fromTwoCols(fnm: String, sep: String, head: Boolean) = {
-    readTable(fnm, sep = sep, head = head)
-      .map(x => new BedElement4(
-        GenomicRange.fromUCSCStr(x(0)),
-        x(1)
-      ))
-      .toVector
+    os.read.lines.stream(os.Path(fnm))
+      .slice(if(head) 1 else 0, Int.MaxValue)
+      .map(x => x.strip().split(sep))
+      .map(x =>
+        new BedElement4(
+            GenomicRange.fromUCSCStr(x(0)),
+            x(1)
+        )
+      ).toVector
   }
 }
 

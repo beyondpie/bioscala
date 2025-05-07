@@ -71,6 +71,9 @@ def readHead(fnm:String): String = {
 /**
   * Read all the lines from a file
   *  At most 2147483647 (Int.MaxValue) lines.
+  * TODO:
+  * - use syntax that more robust to skip head
+  * - use Vector or Iterable type as return.
   *
   * @param fnm
   * @param sep
@@ -89,7 +92,6 @@ def readTable(fnm: String, sep: String = ",",
     os.read.lines
       .stream(path)
       .slice(if (head) 1 else 0, Int.MaxValue)
-      .toList
       .map(x => {
         x.split(sep)
           .toList
@@ -98,8 +100,8 @@ def readTable(fnm: String, sep: String = ",",
           // skip empty field
           .filter(x => skipEmptyField || (x.length >= 1))
       })
-      // skip empty line
       .filter(x => x.length >= 1)
+      .toList
   }
 }
 

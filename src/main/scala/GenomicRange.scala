@@ -1,5 +1,8 @@
 package GenomicRange
-// TODO: change the package name
+// TODO:
+//  1. change the package name
+//  2. use named tuple introduced in 3.6 scala (stable in 3.7)
+//     for lightweight genomic ranges
 
 import scala.util.matching.Regex
 import scala.collection.Searching.Found
@@ -74,6 +77,14 @@ case class GenomicRange(chrom: String, startFrom: Int, endTo: Int) {
       false
     }
   }
+
+  /**
+    * Get the intersected region.
+    * If no overlap, None will be returned.
+    *
+    * @param b
+    * @return
+    */
   def overlap(b: GenomicRange): Option[GenomicRange] = {
     if (!isOverlap(b)) {
       None
@@ -84,6 +95,12 @@ case class GenomicRange(chrom: String, startFrom: Int, endTo: Int) {
     }
   }
 
+  /**
+    * Strictly equals: all elements have to be equal.
+    *
+    * @param that
+    * @return
+    */
   override def equals(that: Any): Boolean = that match {
     case a: GenomicRange => {
       if((chrom == a.chrom) && (startFrom == a.startFrom) && (endTo == a.endTo)) {
@@ -95,6 +112,13 @@ case class GenomicRange(chrom: String, startFrom: Int, endTo: Int) {
     case _               => false
   }
 
+  /**
+    * Compare chromosome firslty (current implementation, use String Order)
+    * Then compare the coordinate (from 5' -> 3', the former the smaller).
+    *
+    * @param b
+    * @return
+    */
   def compare(b: GenomicRange): Int = {
     val t1 = chrom.compare(b.chrom)
     if t1 != 0 then t1
@@ -103,17 +127,17 @@ case class GenomicRange(chrom: String, startFrom: Int, endTo: Int) {
     else 0
   }
 
-  def isInSortedRanges(c: List[GenomicRange]): Boolean = {
+  def isInSortedRanges(c: Iterable[GenomicRange]): Boolean = {
     c.find(b => this.isOverlap(b)).isDefined
+  }
+
+  def isInSortedRanges(c: Map[String, Iterable[GenomicRange]]): Boolean = {
+    if c.contains(this.chrom) then isInSortedRanges(c(this.chrom))
+    else false
   }
 
   def isInSortedRanges4Merge(c: List[GenomicRange]): Boolean = {
     c.find(b => this.isOverlap4Merge(b)).isDefined
-  }
-
-  def isInSortedRanges(c: Map[String, List[GenomicRange]]): Boolean = {
-    if c.contains(this.chrom) then isInSortedRanges(c(this.chrom))
-    else false
   }
 
   def isInSortedRanges4Merge(c: Map[String, List[GenomicRange]]): Boolean = {
@@ -202,6 +226,14 @@ object GenomicRange {
     new GenomicRange(a2(0), a3(0).toInt, a3(1).toInt)
   }
 
+  /**
+    * Transform a List of GenomicRanges to a chromosome
+    * majored Map with sorted GenomicRanges in that chromosome.
+    * 
+    *
+    * @param a
+    * @return
+    */
   def reorgGenomicRanges(
     a: List[GenomicRange]
   ): Map[String, List[GenomicRange]] = {
@@ -224,14 +256,15 @@ object GenomicRange {
   * We find the first element position in subject that overlaps with
   * a given query by using `dropWhile`; then we keep the elements
   * untill the elements have no overlaps with the query term by using
-  * `takeWhile`.
+  * `takeWhile`. If elements left, we then keep the coordinates of the
+  * subject ones.
   * 
   * @param a
   * @param b
   * @return
   * 1. Only queryIndex with overlapped subjectIndex will be returned.
   * 2. QueryIndex and subjectIndex, start from 0.
-  * 3. The overlapped subject index are recorded as
+  * 3. The overlapped genomic coordinates from Subject are recorded as
   *    [startId, endId + 1), i.e., left closed and right open
   * 
   */
@@ -314,10 +347,17 @@ def isIn(
   a.isInSortedRanges(c)
 }
 
+/**
+  * Filter Region A that overlap with Region B.
+  *
+  * @param a
+  * @param b
+  * @return
+  */
 def filterByRanges(
-  a: List[GenomicRange],
-  b: List[GenomicRange]
-): List[GenomicRange] = {
+  a: Seq[GenomicRange],
+  b: Seq[GenomicRange]
+): Seq[GenomicRange] = {
   val c =
     b.groupBy(_.chrom)
       .map((chrom, xs) => (chrom, xs.sorted(mouseGenomicRangeOrd).toList))

@@ -36,8 +36,9 @@ import SZUtils.{str2path, path2str}
  *   acetylated regions). In theory, HOMER can work with very large
  *   regions (i.e. 10kb), but with the larger the regions comes more
  *   sequence and longer execution time.
+ * TODO: use boolean instead of string for denovo
  * @param denovo
- *   "-nomotif" or ""
+ *   "-nomotif" (false, don't search for de novo motif enrichment) or "" (true)
  * @param bgfnm
  *   file for background (bed or other formats). These will still be
  *   normalized for CpG% or GC% content just like randomly chosen
@@ -58,7 +59,7 @@ import SZUtils.{str2path, path2str}
  *   biasing the results. Usually it's safer to go with the masked
  *   version.
  * @param hyperGenomic
- *   ("-h" or "". By default, findMotifsGenome.pl uses the binomial
+ *   ("-h" or ""). By default, findMotifsGenome.pl uses the binomial
  *   distribution to score motifs. This works well when the number of
  *   background sequences greatly out number the target sequences -
  *   however, if you are using "-bg" option above, and the number of
@@ -68,8 +69,12 @@ import SZUtils.{str2path, path2str}
  *   in large numbers of regions.
  */
 class MotifFinderByHomer2(
-  val inputfnm: String, val flagfnm: String, val logfnm: String,
-  val name: String, val outd: String, val skip: Boolean = true,
+  val inputfnm: String,
+  val flagfnm: String,
+  val logfnm: String,
+  val name: String,
+  val outd: String,
+  val skip: Boolean = true,
   val check: Boolean = true,
   val homer2: String = "/projects/ps-renlab2/szu/softwares/homer/bin",
   val seqsize: Int = -1, val bgfnm: Option[String] = None,
@@ -100,6 +105,9 @@ class MotifFinderByHomer2(
   def runCore(): Unit = needRun match {
     case true => {
       println(s"Run Homer2 for $name .")
+      if (!os.exists(os.Path(outd))) {
+        os.makeDir(os.Path(outd))
+      }
       os.proc(css*)
         .call(
             check = check,

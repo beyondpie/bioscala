@@ -18,3 +18,7 @@ Scala library for Biology
         - I add one "AmmMain", which can start the interactive ammonite REPL for interactive usage like
           Python / R REPL.
       - If you assemble the projects, you can then =java -cp target/scala-verion/version.jar someMain someArgs=.
+
+
+** TODO:
+   1. Use named tuple to replace most of case classes.

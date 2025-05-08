@@ -3,7 +3,6 @@ package GenomicRange
 //  1. change the package name
 //  2. use named tuple introduced in 3.6 scala (stable in 3.7)
 //     for lightweight genomic ranges
-//  3. use named tuple (Int, Int) for Genomic Coordinate in one chromosome
 
 import scala.util.matching.Regex
 import scala.collection.Searching.Found

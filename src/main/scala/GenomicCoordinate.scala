@@ -41,22 +41,24 @@ def isGenomicCoordSorted(x: Iterable[Coord]):Boolean = {
   *    [startId, endId + 1), i.e., left closed and right open
   * 
   */
-def findOvlpOneChrSorted(query: Vector[(Int, Int)], subject: Vector[(Int, Int)]): Vector[(Int, (Int, Int))] = {
+def findOvlpOneChrSorted(query: Vector[Coord],
+  subject: Vector[Coord]): Vector[(Int, Coord)] = {
   if (!isGenomicCoordSorted(query)) {
     throw new RuntimeException("query is not sorted.")
   }
   if (!isGenomicCoordSorted(subject)) {
     throw new RuntimeException("subject is not sorted.")
   }
-  val r = ListBuffer.empty[(Int, (Int, Int))]
+  val r = ListBuffer.empty[(Int, Coord)]
   query.zipWithIndex.foldLeft[Int](0)((si, q) => {
     val sovlp =
       subject.zipWithIndex
         .dropWhile((x, id) => {
-          (id < si) || (x._2 < q._1._1) || (x._1 >= q._1._2)
+          (id < si) ||
+            (x.endTo < q._1.startFrom) || (x.startFrom >= q._1.endTo)
         })
         .takeWhile((x, id) => {
-          (x._2 >= q._1._1) && (x._1 < q._1._2)
+          (x.endTo >= q._1.startFrom) && (x.startFrom < q._1.endTo)
         })
     if (sovlp.length >= 1) {
       r.addOne((q._2, (sovlp.head._2, sovlp.last._2 + 1)))
@@ -66,4 +68,29 @@ def findOvlpOneChrSorted(query: Vector[(Int, Int)], subject: Vector[(Int, Int)])
     }
   })
   r.toVector
+}
+
+
+/**
+  * Intersect between two coords.
+  *
+  * @param x
+  * @param y
+  * @return
+  */
+def intersect(x: Coord, y: Coord): Option[Coord] = {
+  if (x.startFrom <= y.startFrom ) {
+    if (x.endTo <= y.startFrom) {
+      None
+    }
+    else {
+      Some((startFrom = y.startFrom, endTo = x.endTo.min(y.endTo)))
+    }
+  } else {
+    if (y.endTo <= x.startFrom) {
+      None
+    } else {
+      Some(startFrom = x.startFrom, endTo = y.endTo.min(x.endTo))
+    }
+  }
 }

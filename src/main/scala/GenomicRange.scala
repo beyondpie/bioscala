@@ -229,7 +229,7 @@ object GenomicRange {
   /**
     * Transform a List of GenomicRanges to a chromosome
     * majored Map with sorted GenomicRanges in that chromosome.
-    * 
+    * TODO: use a more explicit function name
     *
     * @param a
     * @return
@@ -244,7 +244,21 @@ object GenomicRange {
           xs.sorted(mouseGenomicRangeOrd).toList))
   }
 
+  def isSorted(a: Seq[GenomicRange]): Boolean = ???
+
 } //end of GenomicRange
+
+/**
+  * Check if a vector of genomic coordinates are well sorted or not
+  * Ref: StackOverflow about check-whether-a-collection-is-ordered
+  * @param x
+  * @return
+  */
+def isGenomicCoordSorted(x: Iterable[(Int, Int)]):Boolean = {
+  x.view.zip(x.tail).toStream.forall( (x, y) => {
+    (x._1 <= y._1) && (x._2 <= y._2)
+  })
+}
 
 /**
   * Find Overlap between two ranges in the same chromosomes.
@@ -269,7 +283,12 @@ object GenomicRange {
   * 
   */
 def findOvlpOneChrSorted(query: Vector[(Int, Int)], subject: Vector[(Int, Int)]): Vector[(Int, (Int, Int))] = {
-  // TODO: add checking if two inputs are sorted.
+  if (!isGenomicCoordSorted(query)) {
+    throw new RuntimeException("query is not sorted.")
+  }
+  if (!isGenomicCoordSorted(subject)) {
+    throw new RuntimeException("subject is not sorted.")
+  }
   val r = ListBuffer.empty[(Int, (Int, Int))]
   query.zipWithIndex.foldLeft[Int](0)((si, q) => {
     val sovlp =

@@ -117,11 +117,14 @@ object BedToolMerge2 extends Merge {
     }
   }
   // twice is not enough
-  // a: chr1: 1-5 b: chr1:2-3. c: chr1:4-5
+  // a: chr1: 1-10 b: chr1:2-3, c: chr1:4-5, d: chr1:7-11
   // in the above case, if we run mergeSorted_ once
-  // we would have chr1:1-5, and chr1:4-5
-  // since we only compare left and right
-  // if twice, we only have chr1:1-5 finally
+  // we would have chr1:1-10, and chr1:4-5, chr1:7-11 since
+  // we only compare adjacent two elements at one time.
+  // Then at second time, we will have,
+  // chr1:1-10, chr1:4-5; chr1: 7-11
+  // Only run third the time here, we can have
+  // chr1: 1-11 finally
   def mergeSorted(r: Peaks): Peaks = {
     var r0 = mergeSorted_(r)
     var l0 = r.length

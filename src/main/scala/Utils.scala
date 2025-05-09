@@ -13,8 +13,8 @@ import java.io.File
  * @param head String, columns for the file if it's "" then no columns as header
  *   no new line symbol
  */
-def writeListOfString2File[T <: Iterable](
-  content: T[String],
+def writeListOfString2File(
+  content: Iterable[String],
   to: String, overwrite: Boolean = true,
   head: String = ""
 ): Unit = {

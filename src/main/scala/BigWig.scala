@@ -4,10 +4,11 @@ import os._
 import org.broad.igv.bbfile.BBFileReader
 import scala.collection.mutable.ListBuffer
 import GenomicRange.{
-  GenomicRange, mouseGenomicRangeOrd, findOvlpOneChrSorted
-}
+  GenomicRange, mouseGenomicRangeOrd}
 import SZUtils.writeListOfString2File
 import SZUtils.getStatistic
+import GenomicCoordinate.findOvlpOneChrSorted
+import scala.language.experimental.namedTuples
 
 case class BedGraphElement(g: GenomicRange, s: Double) {
   def mkString(sep: String = "\t"): String = {
@@ -25,11 +26,11 @@ object BedGraphElement {
 }
 
 object BedGraph {
-  def sortBedGraph(x: List[BedGraphElement]): List[BedGraphElement] = {
+  def sortBedGraph(x: Seq[BedGraphElement]): Seq[BedGraphElement] = {
     x.sortBy(_.g)
   }
 
-  def toBedGraph(x: List[BedGraphElement], outf: String): Unit = {
+  def toBedGraph(x: Seq[BedGraphElement], outf: String): Unit = {
     writeListOfString2File(
         content = x.map(i => i.toString),
         to = outf,
@@ -169,8 +170,8 @@ def mapBigWigOnRegionOneChr(
     0.until(q.length)
       .map(i => {
         if (qId2sIds.contains(i)) {
-          val sl = qId2sIds(i)._1
-          val sr = qId2sIds(i)._2
+          val sl = qId2sIds(i).startFrom
+          val sr = qId2sIds(i).endTo
           getStatistic(Seq.range(sl, sr).map(i => bw2(i).s), statistic,
               emptyValue)
         } else { 0.0 }

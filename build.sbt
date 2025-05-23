@@ -3,7 +3,8 @@ logLevel := Level.Info
 
 // main
 ThisBuild / version := "0.0.33"
-ThisBuild / organization := "com.szu"
+ThisBuild / organization := "ai.zulab"
+ThisBuild / organizationName := "zulab"
 ThisBuild / scalaVersion := "3.7.0"
 name  := "bioscala"
 
@@ -51,7 +52,6 @@ scalacOptions ++= Seq(
     "-language:existentials",
     "-experimental",
     "-unchecked",
-    "-Werror",
     "-explain-types",
     "-explain",
     "-deprecation"
@@ -69,3 +69,41 @@ scalacOptions ++= Seq(
 //   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
 //   case x => MergeStrategy.first
 // }
+
+ThisBuild / organizationHomepage := Some(url("https://beyondpie.github.io/"))
+
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/beyondpie/bioscala"),
+    "scm:git@github.com:beyondpie/bioscala.git"
+  )
+)
+
+ThisBuild / versionScheme := Some("early-semver")
+
+ThisBuild / developers := List(
+  Developer(
+    id = "zulab",
+    name = "Songpeng Zu",
+    email = "panshi.pie@email",
+    url = url("https://beyondpie.github.io/")
+  )
+)
+
+ThisBuild / description := "Explore the usage of scala on biology"
+ThisBuild / licenses := List(
+  "GPLv3" -> new URL("https://www.gnu.org/licenses/gpl-3.0.en.html")
+)
+ThisBuild / homepage := Some(url("https://github.com/beyondpie/bioscala"))
+
+// Remove all additional repository other than Maven Central from POM
+ThisBuild / pomIncludeRepository := { _ => false }
+ThisBuild / publishMavenStyle := true
+
+
+// new setting for the Central Portal
+ThisBuild / publishTo := {
+  val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+  if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
+  else localStaging.value
+}

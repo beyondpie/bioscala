@@ -3,3 +3,4 @@
 // addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "1.10.2")
 // addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.5.5")
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.3.1")
+addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.3.1")

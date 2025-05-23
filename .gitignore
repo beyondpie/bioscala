@@ -10,3 +10,4 @@ hs_err_pid*
 /project/metals.sbt
 /project/project/
 /project/target/
+/.bsp/

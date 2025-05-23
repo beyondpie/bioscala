@@ -3,7 +3,7 @@ logLevel := Level.Info
 
 // main
 ThisBuild / version := "0.0.33"
-ThisBuild / organization := "ai.zulab"
+ThisBuild / organization := "io.github.beyondpie"
 ThisBuild / organizationName := "zulab"
 ThisBuild / scalaVersion := "3.7.0"
 name  := "bioscala"
@@ -83,7 +83,7 @@ ThisBuild / versionScheme := Some("early-semver")
 
 ThisBuild / developers := List(
   Developer(
-    id = "zulab",
+    id = "io.github.beyondpie",
     name = "Songpeng Zu",
     email = "panshi.pie@email",
     url = url("https://beyondpie.github.io/")

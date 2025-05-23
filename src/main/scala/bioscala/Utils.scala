@@ -5,15 +5,15 @@ import java.io.FileNotFoundException
 import java.io.File
 
 /**
- * Write List of String to one file
+ * Write Iterable Strings to one file
  *
- * @param content
- * @param to
- * @param overwrite
+ * @param content Iterable Strings
+ * @param to output filename
+ * @param overwrite default True, cover the original file.
  * @param head String, columns for the file if it's "" then no columns as header
  *   no new line symbol
  */
-def writeListOfString2File(
+def writeStrings2File(
   content: Iterable[String],
   to: String, overwrite: Boolean = true,
   head: String = ""
@@ -27,7 +27,7 @@ def writeListOfString2File(
   if (!os.exists(dir)) {
     os.makeDir.all(dir)
   }
-  if (head.length >= 1) {
+  if (head.nonEmpty) {
     os.write(out, s"${head}\n")
     os.write.append(out, content.mkString("\n"))
   } else {
@@ -47,7 +47,7 @@ def writeMap2File[K](
   if (!os.exists(dir)) {
     os.makeDir.all(dir)
   }
-  if (head.length >= 1) {
+  if (head.nonEmpty) {
     os.write(out, s"${head}\n")
   }
 
@@ -98,9 +98,9 @@ def readTable(fnm: String, sep: String = ",",
           .map(x => x.strip())
           .map(x => x.replaceAll("\"", ""))
           // skip empty field
-          .filter(x => skipEmptyField || (x.length >= 1))
+          .filter(x => skipEmptyField || x.nonEmpty)
       })
-      .filter(x => x.length >= 1)
+      .filter(x => x.nonEmpty)
       .toList
   }
 }

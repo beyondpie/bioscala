@@ -3,11 +3,11 @@ package SimpleBigWig
 import os._
 import org.broad.igv.bbfile.BBFileReader
 import scala.collection.mutable.ListBuffer
-import GenomicRange.{
+import GRange.{
   GenomicRange, mouseGenomicRangeOrd}
-import SZUtils.writeListOfString2File
+import SZUtils.writeStrings2File
 import SZUtils.getStatistic
-import GenomicCoordinate.findOvlpOneChrSorted
+import bioscala.LightCoord.findOvlpOneChrSorted
 import scala.language.experimental.namedTuples
 
 case class BedGraphElement(g: GenomicRange, s: Double) {
@@ -31,7 +31,7 @@ object BedGraph {
   }
 
   def toBedGraph(x: Seq[BedGraphElement], outf: String): Unit = {
-    writeListOfString2File(
+    writeStrings2File(
         content = x.map(i => i.toString),
         to = outf,
         head = ""
@@ -236,7 +236,7 @@ def mapBigWigOnRegion(
   statistic: String, emptyValue: Double,
   keepOrder: Boolean): Vector[BedGraphElement] = {
   val ordRegion = region.groupBy(_.chrom)
-    .map((k, v) => (k, v.toVector.sorted(mouseGenomicRangeOrd)))
+    .map((k, v) => (k, v.toVector.sorted(using mouseGenomicRangeOrd)))
   val scores =  ordRegion.map((k,v) => {
     if (!bw.contains(k)) {
       (k, v.map(x => new BedGraphElement(g = x, s = emptyValue)))
@@ -286,8 +286,8 @@ def calculateBigWigRegionStatistic(
     .takeWhile(p => p.g.startFrom < endTo)
     .filter(p => p.g.endTo >= startFrom)
     .flatMap(item => {
-      val overlapStart = Math.max(item.g.startFrom, startFrom)
-      val overlapEnd   = Math.min(item.g.endTo, endTo)
+      val overlapStart = item.g.startFrom.max(startFrom)
+      val overlapEnd   = item.g.endTo.min(endTo)
       val v: Double    = item.s
       Seq.fill(overlapEnd - overlapStart)(v)
     })

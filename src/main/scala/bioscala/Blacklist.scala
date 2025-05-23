@@ -1,6 +1,6 @@
 package Blacklist
 
-import GenomicRange.GenomicRange
+import GRange.GenomicRange
 
 case class BlackList(rawBlackList: List[GenomicRange]) {
   val sortedBlackList =

@@ -2,7 +2,7 @@ package ChromHMM
 
 import os._
 import SZUtils.{readHead, readTable}
-import GenomicRange.GenomicRange
+import GRange.GenomicRange
 import Bed.BedElement4
 
 case class ChromHMMState(name: String, g: GenomicRange) {
@@ -12,7 +12,7 @@ case class ChromHMMState(name: String, g: GenomicRange) {
     *
     * @return
     */
-  override def toString(): String = {
+  override def toString: String = {
     s"${g.toString()}_${name}"
   }
 }
@@ -46,7 +46,7 @@ case class PeakChromHMMStateAnnot(p: GenomicRange, a: Vector[ChromHMMState]) {
     *
     * @return
     */
-  override def toString(): String = {
+  override def toString: String = {
     val r1 = s"${p.toString()}"
     val r2 = a.map(x => x.toString()).mkString(";")
     s"${r1},${r2}"
@@ -69,7 +69,7 @@ case class PeakChromHMMStateAnnot(p: GenomicRange, a: Vector[ChromHMMState]) {
   def annotCenter: String = {
     val c = p.getMidGR()
     val i = a.zipWithIndex.filter( _._1.g.isOverlap(c)).map(_._2)
-    if (i.length > 0) {
+    if (i.nonEmpty) {
       a(i(0)).name
     } else {
        "ND"
@@ -91,7 +91,7 @@ case class DenseBedElement(g: GenomicRange, name: String, score: Double,
 def loadDenseBed(f: String): (String, Seq[DenseBedElement]) = {
   val h = readHead(f)
   val content = os.read.lines.stream(os.Path(f))
-    .slice(1, Int.MaxValue)
+    .drop(1)
     .map(x => x.strip().split("\t"))
     .map(x => {
       new DenseBedElement(

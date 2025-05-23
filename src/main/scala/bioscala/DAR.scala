@@ -1,7 +1,7 @@
 package DAR
 // TODO: change package name
 
-import GenomicRange.GenomicRange
+import GRange.GenomicRange
 
 
 /** A simple differential genomic range.

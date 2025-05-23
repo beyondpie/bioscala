@@ -4,9 +4,9 @@ import os._
 import scala.collection.parallel._
 import scala.collection.parallel.CollectionConverters.*
 import Peak.{Peak, Peaks}
-import GenomicRange.{GenomicRange, mouseGenomicRangeOrd}
+import GRange.{GenomicRange, mouseGenomicRangeOrd}
 import Genome.Genome
-import SZUtils.{readTable, writeListOfString2File}
+import SZUtils.{readTable, writeStrings2File}
 import SZUtils.mergeListOfMap
 import MetaData.TSCCMeta
 import SZUtils.writeMap2File
@@ -30,7 +30,7 @@ class BlacklistFilter(val bedfnm: String) extends Filter {
 }
 
 class GenomeFilter(val fanm: String) extends Filter {
-  val useChrReg = "chr[1-9]|chr1[0-9]|chrX|chrY".r
+  private val useChrReg = "chr[1-9]|chr1[0-9]|chrX|chrY".r
   def UnWantedChroms(a: Peaks): Peaks =
     a.filter(x => useChrReg.matches(x.r.chrom))
   println(s"Loading genome: ${fanm}")
@@ -41,8 +41,11 @@ class GenomeFilter(val fanm: String) extends Filter {
     NFilter(UnWantedChroms(a))
 }
 
+
+// TODO:
+// - merge with GenomicRangeMerge, which is more general.
 trait Merge {
-  val chromOrd = GenomicRange.chromOrd
+  val chromOrd: List[String] = GenomicRange.chromOrd
   def mergeSorted(r: Peaks): Peaks
   def merge2(a: Map[String, Peaks]): Map[String, Peaks] = {
     a.par
@@ -50,7 +53,7 @@ trait Merge {
         println(s"merge ${k} ... ")
         val r = (
           k,
-          if (ps.length > 0) {
+          if (ps.nonEmpty) {
             println("sorted peaks within chrom then run merge.")
             mergeSorted(ps.sortBy(x => (x.r.startFrom, x.r.endTo)))
           } else {
@@ -96,13 +99,13 @@ object BedToolMerge2 extends Merge {
       spm = r.map(_.spm).max
     )
   }
-  def mergeSorted_(r: Peaks): Peaks = {
+  private def mergeSorted_(r: Peaks): Peaks = {
     if (r.length < 1) {
       List()
     } else {
-      val isOvped = (r(0) :: r)
+      val isOvped = (r.head :: r)
         .sliding(size = 2, step = 1)
-        .map(x => x(0).r.isOverlap4Merge(x(1).r))
+        .map(x => x.head.r.isOverlap4Merge(x(1).r))
         .toList
       val cuts = isOvped.zipWithIndex
         .filter(!_._1)
@@ -111,7 +114,7 @@ object BedToolMerge2 extends Merge {
       ((0 :: cuts) ::: List(r.length))
         .sliding(size = 2, step = 1)
         .map(x => {
-          combineSorted(r.slice(x(0), x(1)))
+          combineSorted(r.slice(x.head, x(1)))
         })
         .toList
     }
@@ -332,7 +335,7 @@ object TestBestSPMerge {
 
   val r = mp("chr2").sortBy(x => (x.r.startFrom, x.r.endTo))
   val content = r.map(x => x.r.toString)
-  SZUtils.writeListOfString2File(
+  SZUtils.writeStrings2File(
     content = content,
     to = s"${rscd}/allPeaksChr2.tsv"
   )

@@ -5,9 +5,9 @@
 package Bed
 
 import os._
-import GenomicRange.GenomicRange
+import GRange.GenomicRange
 import SZUtils.readTable
-import SZUtils.writeListOfString2File
+import SZUtils.writeStrings2File
 
 // TODO: use g for GenomicRange in order to keep consistent with
 // BedGraphElement
@@ -98,7 +98,7 @@ object BedPE10Element {
 
   def writeBedPE(x: List[BedPE10Element], fnm: String,
     head: String = ""): Unit = {
-    writeListOfString2File(
+    writeStrings2File(
         content = x.map(e => e.mkString("\t")),
         to = fnm,
         overwrite = true,

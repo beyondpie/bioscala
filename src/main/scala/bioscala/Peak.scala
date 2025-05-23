@@ -1,7 +1,7 @@
 package Peak
 
-import GenomicRange.GenomicRange
-import SZUtils.{readTable, writeListOfString2File, writeMap2File}
+import GRange.GenomicRange
+import SZUtils.{readTable, writeStrings2File, writeMap2File}
 import Bed.GFF
 
 /**
@@ -124,7 +124,7 @@ object Peaks {
     else
       val content =
         Peak.heads.mkString(sep) :: p.map(x => x.mkString(sep))
-      writeListOfString2File(content, fnm, overwrite)
+      writeStrings2File(content, fnm, overwrite)
   }
 
   def writeMap(

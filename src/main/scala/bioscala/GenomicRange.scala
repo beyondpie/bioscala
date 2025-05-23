@@ -1,8 +1,14 @@
-package GenomicRange
-// TODO:
-//  1. change the package name
-//  2. use named tuple introduced in 3.6 scala (stable in 3.7)
-//     for lightweight genomic ranges
+package GRange
+
+// case class seems to be resource cost when we have thousands of
+// such elements. Now we are using named tuple (stable feature since 3.7)
+// to gradually replace GenomicRanges.
+// See details at LightCoord.scala
+
+// But for small number of genomic ranges, case class is more powerful and easier
+// than named tuple for usage.
+
+// So we keep both of them at this moment.
 
 import scala.util.matching.Regex
 import scala.collection.Searching.Found
@@ -89,9 +95,7 @@ case class GenomicRange(chrom: String, startFrom: Int, endTo: Int) {
     if (!isOverlap(b)) {
       None
     } else {
-      Some(
-        GenomicRange(b.chrom, startFrom.max(b.startFrom), endTo.min(b.endTo))
-      )
+      Option(GenomicRange(b.chrom, startFrom.max(b.startFrom), endTo.min(b.endTo)))
     }
   }
 
@@ -128,7 +132,7 @@ case class GenomicRange(chrom: String, startFrom: Int, endTo: Int) {
   }
 
   def isInSortedRanges(c: Iterable[GenomicRange]): Boolean = {
-    c.find(b => this.isOverlap(b)).isDefined
+    c.exists(b => this.isOverlap(b))
   }
 
   def isInSortedRanges(c: Map[String, Iterable[GenomicRange]]): Boolean = {
@@ -137,7 +141,7 @@ case class GenomicRange(chrom: String, startFrom: Int, endTo: Int) {
   }
 
   def isInSortedRanges4Merge(c: List[GenomicRange]): Boolean = {
-    c.find(b => this.isOverlap4Merge(b)).isDefined
+    c.exists(b => this.isOverlap4Merge(b))
   }
 
   def isInSortedRanges4Merge(c: Map[String, List[GenomicRange]]): Boolean = {
@@ -241,7 +245,7 @@ object GenomicRange {
     else
       a.groupBy(_.chrom)
         .map((chrom, xs) => (chrom,
-          xs.sorted(mouseGenomicRangeOrd).toList))
+          xs.sorted(using mouseGenomicRangeOrd).toList))
   }
 
   def isSorted(a: Seq[GenomicRange]): Boolean = ???
@@ -257,7 +261,7 @@ def isInSortedRanges_(
 ): Boolean = {
   if c.contains(a.chrom) then
     val pool = c(a.chrom)
-    val t = pool.search(a)(mouseGenomicRangeOrd)
+    val t = pool.search(a)(using mouseGenomicRangeOrd)
     t match {
       case a: Found => true
       case b: InsertionPoint => {
@@ -280,7 +284,7 @@ def isInSortedRanges_(
 }
 
 given mouseChrOrd: Ordering[GenomicRange] with {
-  val chr2int = MouseGenome.ordChrs.zipWithIndex.toMap
+  private val chr2int = MouseGenome.ordChrs.zipWithIndex.toMap
   def compare(x: GenomicRange, y: GenomicRange):Int = {
     chr2int(x.chrom).compare(chr2int(y.chrom))
   }
@@ -301,16 +305,17 @@ def isIn(
 ): Boolean = {
   val c =
     b.groupBy(_.chrom)
-      .map((chrom, xs) => (chrom, xs.sorted(mouseGenomicRangeOrd).toList))
+      .map((chrom, xs) => (chrom, xs.sorted(using mouseGenomicRangeOrd).toList))
   a.isInSortedRanges(c)
 }
 
 /**
   * Filter Region A that overlap with Region B.
   *
-  * @param a
-  * @param b
-  * @return
+  * @param a GenomicRanges without needing to be sorted
+  * @param b GenomicRanges without needing to be sorted
+  * We will organize b as Map of chrom and sorted genomic ranges.
+  * @return Any element in a that overlap with b
   */
 def filterByRanges(
   a: Seq[GenomicRange],
@@ -318,7 +323,7 @@ def filterByRanges(
 ): Seq[GenomicRange] = {
   val c =
     b.groupBy(_.chrom)
-      .map((chrom, xs) => (chrom, xs.sorted(mouseGenomicRangeOrd).toList))
+      .map((chrom, xs) => (chrom, xs.sorted(using mouseGenomicRangeOrd)))
   a.filter(x => x.isInSortedRanges(c))
 }
 

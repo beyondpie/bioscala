@@ -2,10 +2,10 @@
 logLevel := Level.Info
 
 // main
-ThisBuild / version := "0.0.33"
+ThisBuild / version := "0.0.6"
 ThisBuild / organization := "io.github.beyondpie"
 ThisBuild / organizationName := "zulab"
-ThisBuild / scalaVersion := "3.7.0"
+ThisBuild / scalaVersion := "3.7.3"
 name  := "bioscala"
 
 // for igv
@@ -107,3 +107,4 @@ ThisBuild / publishTo := {
   if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
   else localStaging.value
 }
+

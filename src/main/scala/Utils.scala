@@ -4,6 +4,7 @@ package SZUtils
 // 1. rename SZUtils as bioscala.utils
 // 2. put conversions into seperate file
 // 3. put different classes of functions into different modules
+// 4. add bioscala as prefix for this package
 
 import os._
 import java.io.FileNotFoundException
@@ -20,6 +21,9 @@ import java.io.File
   * @param head
   *   String, columns for the file if it's "" then no
   *   columns as header no new line symbol
+  * Return java.nio.file.FileAlreadyExistsException if
+  *  output file exists and overwrite is false.
+  * TODO: fix logic when overwrite is false and file exits.
   */
 def writeStrings2File(
   content: Iterable[String],
@@ -32,6 +36,9 @@ def writeStrings2File(
     println(s"${to} exist, will remove it.")
     os.remove(out)
   }
+  // if (!overwrite && os.exists(out)) {
+  //   Unit
+  // }
   val dir = out / os.up
   if (!os.exists(dir)) {
     os.makeDir.all(dir)

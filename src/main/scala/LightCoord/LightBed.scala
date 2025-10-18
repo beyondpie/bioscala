@@ -1,4 +1,5 @@
 package bioscala.LightCoord.Bed
+
 import bioscala.LightCoord.GenomeCoord._
 import os._
 
@@ -14,7 +15,7 @@ def mkStringLightBedElement(x: LightBedElement,
   s"$base$sep${x.name}$sep${x.score.toString}$sep${x.g.strand}"
 }
 
-// TODO: add read LightBed function
+
 def readLightBed(fnm: String): LightBed = {
   os.read.lines
     .stream(os.Path(fnm))

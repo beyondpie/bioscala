@@ -88,14 +88,14 @@ def getWigValue(r: BBFileReader, x: GenomeCoord,
   Try({
     val a  = ListBuffer[LightBedGraphElement]()
     val wI = r.getBigWigIterator(x.chrom, x.coord.startFrom,
-        x.chrom, x.coord.endTo, contained)
+      x.chrom, x.coord.endTo, contained)
     while (wI.hasNext) {
       val item = wI.next()
       a.addOne((g = (chrom = item.getChromosome(),
-                  coord = (startFrom = item.getStartBase(),
-                      endTo = item.getEndBase()), strand = "."),
-              s = item.getWigValue()))
-    }
+        coord = (startFrom = item.getStartBase(),
+          endTo = item.getEndBase()),
+        strand = "."),
+        s = item.getWigValue()))}
     a.toVector
   }) match {
     case Success(v) => {
@@ -106,5 +106,47 @@ def getWigValue(r: BBFileReader, x: GenomeCoord,
       }
     }
     case Failure(e) => Vector((g = x, s = emptyValue))
+  }
+}
+
+/**
+  * Get average value from a bigwig file for a given region.
+  *
+  * Here the average is the weighted sum for all the bigwig regions
+  * overlapped with the given region.
+  * 
+  * weightByOverlapRegion: the overlapped region size / sum of all the overlapped
+  * region size (NOT the size of the given region).
+  * weightByGivenRegion: the overlapped region size /
+  *  the size of the given region.
+  * 
+  * @param bwr
+  * @param r
+  * @param emptyValue
+  * @param weightByGivenRegion
+  * @param contained See [[getWigValue]]
+  * @return
+  */
+def getbwOneRegion(
+  bwr: BBFileReader, r: GenomeCoord, emptyValue: Double,
+  weightByGivenRegion: Boolean, contained: Boolean = false
+): Double = {
+  val t = getWigValue(bwr, r, emptyValue, contained)
+  if (t.length < 2) {
+    t.head.s
+  } else {
+    val wv = t.map(
+      y => {
+        val width = y.g.coord.endTo.min(r.coord.endTo) -
+        y.g.coord.startFrom.max(r.coord.startFrom)
+        (width, y.s)
+      }
+    )
+    val ss = wv.map(x => x._1.toDouble * x._2).sum
+    if (weightByGivenRegion) {
+      ss / (r.coord.endTo - r.coord.startFrom).toDouble
+    } else {
+      ss / wv.map(_._1).sum.toDouble
+    }
   }
 }

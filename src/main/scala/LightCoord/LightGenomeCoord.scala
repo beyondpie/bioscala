@@ -3,6 +3,8 @@ package bioscala.LightCoord.GenomeCoord
 import Genome.GenomeOpts.chromOrd
 import bioscala.LightCoord._
 import bioscala.LightCoord.coordOrd
+import os._
+
 
 type GenomeCoord  = (chrom: String, coord: Coord, strand: String)
 type GenomeCoords = Vector[GenomeCoord]
@@ -38,6 +40,18 @@ def mkStringGenomeCoord(x: GenomeCoord, sep: String = "\t",
   } else {
     base
   }
+}
+
+
+def fromBed(bed: String): GenomeCoords = {
+  os.read.lines.stream(os.Path(bed))
+    .map(x => x.strip().split("\t"))
+    .filter(x => x.nonEmpty)
+    .filter(x => x.length >= 3)
+    .map(x => (chrom = x.head,
+      coord = (x(1).toInt, x(2).toInt),
+      strand = "."
+    )).toVector
 }
 
 /** Returns processed overlaping results for

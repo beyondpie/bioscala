@@ -1,15 +1,17 @@
 package bioscala.LightCoord
 
-import scala.collection.mutable.ListBuffer
 import SZUtils.ifelse
+
+import scala.collection.mutable.ListBuffer
 
 /** Genome element range in a given chrom.
   *   - Only start and end position, no chrom info.
   *   - Always from 5' to 3', i.e., startFrom <= endTo
   *   - Follow Bed format, 0-index and range will be
   *     left closed and right open.
-  *   - both start and end positions should be no
+  *   - Both start and end positions should be no
   *     smaller than zero.
+  *   - No strand information.
   */
 type Coord  = (startFrom: Int, endTo: Int)
 type Coords = Vector[Coord]
@@ -24,6 +26,21 @@ given coordOrd: Ordering[Coord] with {
       x.endTo.compare(y.endTo)
     }
   }
+}
+
+/** Returns the distance between two coord.
+  *   1. Zero if they are overlapped.
+  *   2. Positive represents closest gap between them.
+  *
+  * This funcitons is symmetric.
+  *
+  * @param x
+  *   Coord
+  * @param y
+  *   Coord
+  */
+def d(x: Coord, y: Coord): Int = {
+  (x.startFrom - y.endTo).max((y.startFrom - x.endTo)).max(0)
 }
 
 /** Get the center position of a coord. Here center is
@@ -111,6 +128,7 @@ def isOvlp(x: Coord, y: Coord): Boolean = {
   *   [[findOvlp]] . The order of the subject coords
   *   are kept. The output may have zero element, use
   *   nonempty to check it.
+  * TODO: use binary search instead
   */
 def findItOvlp(q: Coord, ssrt: Vector[(Coord, Int)],
   from: Int): Vector[((Coord, Int), Int)] = {
@@ -315,5 +333,43 @@ object Promoter5to3 extends CoordOpt {
   }
   override def getUpStream(x: Coord, upStream: Int): Int = {
     (x.startFrom - upStream).max(0)
+  }
+}
+
+/** Returns the closed coords (one or more) for a given
+  * coord.
+  *
+  *   1. Empty Vector if all coords are beyond the
+  *      range.
+  *   2. Closeness is defined by coords distance
+  *      [[d()]].
+  *   3. All overlapped coords (if had) will be
+  *      returned, else only closest one.
+  * @param x
+  *   the coord for closed coords
+  * @param y
+  *   the pool of coords for selection
+  * @param within
+  *   upstream and downstream of x's two sides
+  */
+def getClosedCoord(x: Coord, y: Coords,
+  within: Int = 1e6.toInt): Coords = {
+  val leftMost: Int  = (x.startFrom - within).max(0)
+  val rightMost: Int = x.endTo + within
+  val p              = y
+    .dropWhile(t => {
+      (t.endTo < leftMost) || (t.startFrom > rightMost)
+    })
+    .sorted(using coordOrd)
+  if (p.isEmpty) {
+    Vector[Coord]()
+  } else {
+    val r     = p.map(t => (t, d(x, t))).sortBy(_._2)
+    val index = r.indexWhere(x => x._2 > 0)
+    if (index < 0) {
+      r.map(x => x._1)
+    } else {
+      r.take(index.max(1)).map(x => x._1)
+    }
   }
 }

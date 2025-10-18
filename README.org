@@ -1,7 +1,7 @@
 # bioscala
 Scala library for Bioinformatics. Right now it's an experimental version.
 
-** Scala
+** Installation
    1. Set up env.
       - Use conda/mamba to install java. Here we use Java version 22.0.1
         =mamba install conda-forge::openjdk=22.0.1=
